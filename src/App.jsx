@@ -1,39 +1,37 @@
+import React from "react";
+import Left from "./Components/Left";
+import Center from "./Components/Center";
+import Right from "./Components/Right";
+import { useSelector } from "react-redux";
+import { exportToHTML } from "./utils/exportHTML";
 
-import './layout.css'
-import './App.css'
-import { useState } from 'react'
-import ComponentSelector from './components/component-selector';
-import Left from './components/left';
-import Center from './components/center';
-import Right from './components/right';
+export default function App() {
+  const components = useSelector((s) => s.builder.componentsOnPage);
 
-function App() {
-
-
-  const [selectedId, setSelectedId] = useState(null);
-
-  
+  const handleExport = () => {
+    const html = exportToHTML(components);
+    const blob = new Blob([html], { type: "text/html" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "exported-website.html";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
 
   return (
-    <div className='layout'>
+    <div className="app">
+      <header className="app-header">
+        <h2>Static Site Builder</h2>
+        <div>
+          <button onClick={handleExport} className="btn primary">Export single HTML</button>
+        </div>
+      </header>
 
-      
-      <Left></Left>
-
-     
-      <Center selectedId={selectedId} setSelectedId={setSelectedId}></Center>
-
-      
-      <div className='right'>
-        <Right></Right>
+      <div className="layout">
+        <Left />
+        <Center />
+        <Right />
       </div>
-
-
-
     </div>
-
-  )
+  );
 }
-
-
-export default App

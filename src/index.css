@@ -9,3 +9,88 @@ body{
   font-family: Arial, sans-serif;
   padding: 0;
 }
+
+:root{
+  --left-w: 240px;
+  --right-w: 320px;
+  --gap: 12px;
+  --bg: #f7f7fb;
+}
+
+*{box-sizing:border-box;font-family:Inter,system-ui,Arial,sans-serif}
+body,html,#root{height:100%;margin:0;background:var(--bg)}
+
+.app-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 20px;
+  border-bottom:1px solid #e6e6e6;
+  background:white;
+}
+
+.layout{
+  display:flex;
+  height: calc(100vh - 64px);
+  gap: var(--gap);
+  padding:12px;
+}
+
+.left{
+  width: var(--left-w);
+  background:#fff;
+  border:1px solid #e6e6e6;
+  border-radius:8px;
+  padding:12px;
+  overflow:auto;
+}
+
+.center{
+  flex:1;
+  background:#fff;
+  border:1px solid #e6e6e6;
+  border-radius:8px;
+  padding:16px;
+  overflow:auto;
+  min-width: 300px;
+}
+
+.right{
+  width: var(--right-w);
+  background:#fff;
+  border:1px solid #e6e6e6;
+  border-radius:8px;
+  padding:12px;
+  overflow:auto;
+}
+
+.component-card{
+  padding:10px;
+  border:1px dashed #ddd;
+  border-radius:8px;
+  margin-bottom:10px;
+  cursor:grab;
+  background:#fafafa;
+}
+
+.page-item{
+  padding:10px;
+  border-radius:8px;
+  background:#fff;
+  border:1px solid #eee;
+  margin-bottom:12px;
+}
+
+.page-item.selected{
+  outline: 3px solid #3b82f6;
+}
+
+.btn{padding:8px 12px;border-radius:6px;border:0;cursor:pointer}
+.btn.primary{background:#3b82f6;color:white}
+.small{font-size:13px;padding:6px 8px}
+.label{font-size:13px;color:#333;margin-bottom:6px}
+.input, .color, textarea, select{
+  width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-bottom:10px;
+}
+
+.hint{font-size:12px;color:#666}
