@@ -1,0 +1,22 @@
+.layout {
+  display: flex;
+  height: 100vh;
+}
+
+.left {
+  width: 200px;
+  background: #fae4e4;
+  padding: 10px;
+}
+
+.center {
+  flex: 1;
+  background: #fafafa;
+  padding: 10px;
+}
+
+.right {
+  width: 250px;
+  background: #fae4e4;
+  padding: 10px;
+}
