@@ -1,68 +1,77 @@
-/**
- * Creates a single-file HTML string from components array.
- * Basic inline styles only. Escapes text content.
- */
-function escapeHtml(s = "") {
-  return String(s)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
+// src/utils/exportHTML.js
+function kebabCase(str = "") {
+  return str.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
 }
-
-export function exportToHTML(components) {
-  let body = "";
-
-  components.forEach((c) => {
-    const p = c.props || {};
-    switch (c.type) {
-      case "hero":
-        body += `<section style="padding:${escapeHtml(p.padding||"32px")};background:${escapeHtml(p.bg||"#eef2ff")};text-align:center;border-radius:8px;">
-          <h1 style="margin:0;color:${escapeHtml(p.color||"#111")}">${escapeHtml(p.title||"Hero Title")}</h1>
-          <p style="margin-top:8px;color:${escapeHtml(p.color||"#111")}">${escapeHtml(p.subtitle||"")}</p>
-        </section>`;
-        break;
-
-      case "text":
-        body += `<p style="font-size:${escapeHtml(p.size||"16")}px;color:${escapeHtml(p.color||"#111")}">${escapeHtml(p.text||"")}</p>`;
-        break;
-
-      case "card":
-        body += `<div style="padding:${escapeHtml(p.padding||"12px")};background:${escapeHtml(p.bg||"#fff")};border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
-          <h4 style="margin-top:0;color:${escapeHtml(p.color||"#111")}">${escapeHtml(p.title||"Card Title")}</h4>
-          <div style="color:${escapeHtml(p.color||"#111")}">${escapeHtml(p.body||"")}</div>
-        </div>`;
-        break;
-
-      case "button":
-        body += `<button style="padding:${escapeHtml(p.padding||"10px 14px")};background:${escapeHtml(p.bg||"#111")};color:${escapeHtml(p.color||"#fff")};border:none;border-radius:${escapeHtml(p.radius||"6")}px;">${escapeHtml(p.label||"Button")}</button>`;
-        break;
-
-      case "image":
-        body += `<img src="${escapeHtml(p.src||"")}" alt="${escapeHtml(p.alt||"")}" style="max-width:100%;border-radius:8px;">`;
-        break;
-
-      default:
-        body += `<div>Unknown component: ${escapeHtml(c.type)}</div>`;
+function styleObjectToCssString(style = {}) {
+  const parts = [];
+  for (const key in style) {
+    if (style[key] == null) continue;
+    let val = style[key];
+    if (typeof val === "number") {
+      if (val !== 0 && !["opacity", "zIndex", "fontWeight", "lineHeight"].includes(key)) val = `${val}px`;
     }
-
-    body += "\n";
-  });
-
-  const html = `<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Exported Page</title>
-  <style>
-    body{font-family:Inter,Arial,sans-serif;padding:20px;max-width:1100px;margin:0 auto}
-  </style>
-</head>
-<body>
-  ${body}
-</body>
-</html>`;
-
-  return html;
+    if (key === "backgroundImageUrl") {
+      parts.push(`background-image: url(${val});`);
+      continue;
+    }
+    parts.push(`${kebabCase(key)}: ${val};`);
+  }
+  return parts.join(" ");
 }
+function escapeHtml(text) {
+  if (text == null) return "";
+  return String(text).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+}
+function renderNode(node) {
+  if (!node) return "";
+  const styleString = styleObjectToCssString(node.styles || {});
+  const dataAttrs = node.styles && node.styles.display === "grid" ? 'data-grid="true"' : "";
+  const attrs = `${dataAttrs} data-id="${escapeHtml(node.id)}" style="${escapeHtml(styleString)}"`;
+  switch (node.type) {
+    case "root":
+      return (node.children || []).map(renderNode).join("\n");
+    case "text":
+      return `<p ${attrs}>${escapeHtml(node.content || "")}</p>`;
+    case "heading":
+      return `<h2 ${attrs}>${escapeHtml(node.content || "")}</h2>`;
+    case "button":
+      return `<button ${attrs}>${escapeHtml(node.content || "Button")}</button>`;
+    case "image": {
+      const src = escapeHtml((node.props && node.props.src) || "");
+      return `<img ${attrs} src="${src}" alt="" />`;
+    }
+    case "div":
+    case "card":
+    case "section": {
+      const children = (node.children || []).map(renderNode).join("\n");
+      const tag = node.type === "section" ? "section" : "div";
+      return `<${tag} ${attrs}>${children}</${tag}>`;
+    }
+    default:
+      return `<div ${attrs}>${escapeHtml(node.content || node.type)}</div>`;
+  }
+}
+export function exportRootAsHtml(root, options = {}) {
+  const title = options.title || "Exported Page";
+  const fileName = options.fileName || "page.html";
+  const body = renderNode(root);
+  const css = `
+    html,body{margin:0;padding:0;font-family:Inter,system-ui,Arial,sans-serif;color:#111;}
+    .site-container{max-width:1200px;margin:0 auto;padding:20px;}
+    img{max-width:100%;height:auto;display:block;}
+    @media (max-width: 768px) {
+      [data-grid="true"]{grid-template-columns: 1fr !important;}
+      [data-id="hero-left"], [data-id="hero-right"]{width:100% !important; min-width:0 !important;}
+      section { padding-left:16px !important; padding-right:16px !important; }
+    }
+  `;
+  const doc = `<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>${title}</title><style>${css}</style></head><body><div class="site-container">${body}</div></body></html>`;
+  const blob = new Blob([doc], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+export default exportRootAsHtml;

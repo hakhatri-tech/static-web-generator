@@ -1,54 +1,156 @@
-import React from "react";
+// src/components/Left.jsx
+import React, { useState } from "react";
+import { useDrag } from "react-dnd";
+import { ItemTypes } from "../dnd/DragTypes";
 import { useDispatch } from "react-redux";
 import { addComponent } from "../store/builderSlice";
 
-/**
- * Left panel: dragable component templates and quick-add buttons
- */
-const TEMPLATES = [
-  { type: "hero", name: "Hero Section", props: { title: "Hero Title", subtitle: "Subtext", padding: "40px", bg: "#eef2ff", color: "#0f172a" } },
-  { type: "text", name: "Text Block", props: { text: "Some paragraph text...", size: "16", color: "#111" } },
-  { type: "card", name: "Card", props: { title: "Card Title", body: "Card body text", padding: "16px", bg: "#fff" } },
-  { type: "button", name: "Button", props: { label: "Click me", padding: "10px 18px", bg: "#111827", color: "#fff", radius: "6" } },
-  { type: "image", name: "Image", props: { src: "https://via.placeholder.com/600x300", alt: "Placeholder" } }
+const Section = ({ title, children }) => {
+  const [open, setOpen] = useState(true);
+
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <div
+        onClick={() => setOpen(!open)}
+        style={{
+          fontWeight: 600,
+          cursor: "pointer",
+          padding: "6px 0",
+          borderBottom: "1px solid #e5e7eb",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        {title}
+        <span style={{ fontSize: 12, color: "#6b7280" }}>
+          {open ? "▾" : "▸"}
+        </span>
+      </div>
+
+      {open && <div style={{ marginTop: 10 }}>{children}</div>}
+    </div>
+  );
+};
+
+const Item = ({ label, type, onAdd }) => {
+  const [{ isDragging }, dragRef] = useDrag(() => ({
+    type: ItemTypes.NEW_COMPONENT,
+    item: {
+      type: ItemTypes.NEW_COMPONENT,
+      newType: type,
+    },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  }));
+
+  return (
+    <div
+      ref={dragRef}
+      onClick={() => onAdd(type)}
+      style={{
+        padding: "8px 10px",
+        borderRadius: 6,
+        border: "1px solid #e5e7eb",
+        marginBottom: 6,
+        cursor: "grab",
+        background: isDragging ? "#dbeafe" : "#fff",
+        transition: "0.2s",
+        userSelect: "none",
+      }}
+    >
+      {label}
+    </div>
+  );
+};
+
+// 📦 READY-TO-USE BIG BLOCKS (HERO, NAVBAR, FEATURES, CTA, FOOTER…)
+const blocks = [
+  { label: "Navbar", type: "navbar" },
+  { label: "Hero Section", type: "hero" },
+  { label: "Feature Grid", type: "featureGrid" },
+  { label: "Testimonials", type: "testimonials" },
+  { label: "Call To Action", type: "cta" },
+  { label: "Footer", type: "footer" },
+  { label: "Pricing Table", type: "pricing" },
+  { label: "FAQ Accordion", type: "faq" },
+  { label: "Two Column Layout", type: "twoCol" },
+  { label: "Card Block", type: "cardBlock" },
 ];
 
 export default function Left() {
   const dispatch = useDispatch();
 
-  function onDragStart(e, t) {
-    e.dataTransfer.setData("componentType", JSON.stringify(t));
-  }
-
-  function quickAdd(t) {
-    dispatch(addComponent({ type: t.type, props: t.props }));
-  }
+  const add = (type) => {
+    dispatch(addComponent({ type, targetId: "root", insertIndex: null }));
+  };
 
   return (
-    <aside className="left">
-      <h4>Components</h4>
+    <aside
+      style={{
+        width: 280,
+        padding: 16,
+        borderRight: "1px solid #e5e7eb",
+        overflowY: "auto",
+        height: "100vh",
+        boxSizing: "border-box",
+      }}
+    >
+      {/* SEARCH BOX */}
+      <input
+        placeholder="Search components..."
+        style={{
+          width: "100%",
+          padding: "8px",
+          marginBottom: 14,
+          borderRadius: 6,
+          border: "1px solid #d1d5db",
+        }}
+      />
 
-      {TEMPLATES.map((t) => (
-        <div
-          key={t.type}
-          className="component-card"
-          draggable
-          onDragStart={(e) => onDragStart(e, t)}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div>
-              <strong>{t.name}</strong>
-              <div className="hint">{t.type}</div>
-            </div>
-            <button className="btn small" onClick={() => quickAdd(t)}>Add</button>
-          </div>
-        </div>
-      ))}
+      {/* BASIC HTML ELEMENTS */}
+      <Section title="Basic Elements">
+        <Item label="Div" type="div" onAdd={add} />
+        <Item label="Section" type="section" onAdd={add} />
+        <Item label="Container" type="container" onAdd={add} />
+        <Item label="Text" type="text" onAdd={add} />
+        <Item label="Heading" type="heading" onAdd={add} />
+        <Item label="Span" type="span" onAdd={add} />
+        <Item label="Button" type="button" onAdd={add} />
+        <Item label="Image" type="image" onAdd={add} />
+      </Section>
 
-      <div style={{ marginTop: 14 }}>
-        <div className="label">Tips</div>
-        <div className="hint">Drag a template into the center preview or click Add.</div>
-      </div>
+      {/* MEDIA */}
+      <Section title="Media">
+        <Item label="Image" type="image" onAdd={add} />
+        <Item label="Video" type="video" onAdd={add} />
+        <Item label="Iframe" type="iframe" onAdd={add} />
+      </Section>
+
+      {/* FORM ELEMENTS */}
+      <Section title="Form Elements">
+        <Item label="Input" type="input" onAdd={add} />
+        <Item label="Textarea" type="textarea" onAdd={add} />
+        <Item label="Checkbox" type="checkbox" onAdd={add} />
+        <Item label="Select Dropdown" type="select" onAdd={add} />
+        <Item label="Form" type="form" onAdd={add} />
+      </Section>
+
+      {/* LAYOUT ELEMENTS */}
+      <Section title="Layout">
+        <Item label="Flex Row" type="flexRow" onAdd={add} />
+        <Item label="Flex Column" type="flexCol" onAdd={add} />
+        <Item label="Grid" type="grid" onAdd={add} />
+        <Item label="Card" type="card" onAdd={add} />
+      </Section>
+
+      {/* READY-TO-USE BLOCKS */}
+      <Section title="Ready Blocks">
+        {blocks.map((b) => (
+          <Item key={b.type} label={b.label} type={b.type} onAdd={add} />
+        ))}
+      </Section>
     </aside>
   );
 }

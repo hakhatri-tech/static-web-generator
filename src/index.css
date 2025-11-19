@@ -1,96 +1,33 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-
-
-body{
-  margin: 0;
-  font-family: Arial, sans-serif;
-  padding: 0;
+/* src/index.css - minimal, tweak to taste */
+:root {
+  --bg: #f8fafc;
+  --panel: #ffffff;
+  --muted: #6b7280;
 }
 
-:root{
-  --left-w: 240px;
-  --right-w: 320px;
-  --gap: 12px;
-  --bg: #f7f7fb;
+html,body,#root { height: 100%; margin: 0; font-family: Inter, system-ui, Arial, sans-serif; background: var(--bg); }
+
+.left-panel {
+  background: var(--panel);
+  border-right: 1px solid #e6eef7;
+  box-shadow: 0 2px 6px rgba(2,6,23,0.04);
+  overflow: auto;
 }
 
-*{box-sizing:border-box;font-family:Inter,system-ui,Arial,sans-serif}
-body,html,#root{height:100%;margin:0;background:var(--bg)}
-
-.app-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px 20px;
-  border-bottom:1px solid #e6e6e6;
-  background:white;
+.center-panel {
+  background: #fafafa;
+  border-radius: 8px;
 }
 
-.layout{
-  display:flex;
-  height: calc(100vh - 64px);
-  gap: var(--gap);
-  padding:12px;
+.right-panel {
+  background: var(--panel);
+  border-left: 1px solid #e6eef7;
+  box-shadow: 0 2px 6px rgba(2,6,23,0.04);
+  overflow: auto;
+  padding: 50px;
 }
 
-.left{
-  width: var(--left-w);
-  background:#fff;
-  border:1px solid #e6e6e6;
-  border-radius:8px;
-  padding:12px;
-  overflow:auto;
-}
-
-.center{
-  flex:1;
-  background:#fff;
-  border:1px solid #e6e6e6;
-  border-radius:8px;
-  padding:16px;
-  overflow:auto;
-  min-width: 300px;
-}
-
-.right{
-  width: var(--right-w);
-  background:#fff;
-  border:1px solid #e6e6e6;
-  border-radius:8px;
-  padding:12px;
-  overflow:auto;
-}
-
-.component-card{
-  padding:10px;
-  border:1px dashed #ddd;
-  border-radius:8px;
-  margin-bottom:10px;
-  cursor:grab;
-  background:#fafafa;
-}
-
-.page-item{
-  padding:10px;
-  border-radius:8px;
-  background:#fff;
-  border:1px solid #eee;
-  margin-bottom:12px;
-}
-
-.page-item.selected{
-  outline: 3px solid #3b82f6;
-}
-
-.btn{padding:8px 12px;border-radius:6px;border:0;cursor:pointer}
-.btn.primary{background:#3b82f6;color:white}
-.small{font-size:13px;padding:6px 8px}
-.label{font-size:13px;color:#333;margin-bottom:6px}
-.input, .color, textarea, select{
-  width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-bottom:10px;
-}
-
-.hint{font-size:12px;color:#666}
+/* small inputs */
+input, select, textarea, button { font-family: inherit; font-size: 14px; padding: 8px; border-radius: 6px; border: 1px solid #e5e7eb; }
+button { cursor: pointer; background: #fff; }
+.left-panel, .right-panel { padding: 12px; }
