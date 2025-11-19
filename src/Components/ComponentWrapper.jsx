@@ -106,24 +106,25 @@ export default function ComponentWrapper({ node, depth = 0 }) {
     opacity: isDragging ? 0.9 : 1,
     transition: "outline 120ms ease, box-shadow 120ms ease, transform 120ms ease",
     background: node.styles?.background || "transparent",
+    display: "inline-block"
   };
 
   return (
-    <div
-      ref={setRefs}
-      data-id={node.id}
-      onClick={(e) => {
-        e.stopPropagation();
-        dispatch(selectComponent(node.id));
-      }}
-      style={wrapperStyle}
-    >
-      <ComponentRenderer comp={node}>
-  {(node.children || []).map((c) => (
-    <ComponentWrapper key={c.id} node={c} depth={depth + 1} />
-  ))}
-</ComponentRenderer>
+  <div
+    ref={setRefs}
+    data-id={node.id}
+    style={wrapperStyle}
+    onClick={(e) => {
+      e.stopPropagation();
+      dispatch(selectComponent(node.id));
+    }}
+  >
+    <ComponentRenderer comp={node}>
+      {(node.children || []).map((child) => (
+        <ComponentWrapper key={child.id} node={child} depth={depth + 1} />
+      ))}
+    </ComponentRenderer>
+  </div>
+);
 
-    </div>
-  );
 }

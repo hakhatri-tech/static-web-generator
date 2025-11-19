@@ -1,5 +1,7 @@
 // src/components/ComponentRenderer.jsx
 import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { selectComponent } from "../store/builderSlice";
 
 /**
  * Renders a component WITH its children inside the DOM element.
@@ -85,53 +87,48 @@ function getTag(type) {
 
 export default function ComponentRenderer({ comp, children }) {
   if (!comp) return null;
-
+    const dispatch = useDispatch();
+  const selectedId = useSelector((s) => s.builder.selectedId);
+  const selectedIds = useSelector((s) => s.builder.selectedIds || []);
+  const selected = selectedId === comp.id || selectedIds.includes(comp.id);
+  
   const Tag = getTag(comp.type);
   const styles = styleObj(comp.styles || {});
   const props = comp.props || {};
+  const elementStyle = {
+  ...styles,
+  outline: selected ? "3px solid #2563eb" : "none",
+  boxSizing: "border-box",
+};
 
   // Special handling for IMG, VIDEO, INPUT, IFRAME, CHECKBOX
  // FINAL IMAGE RENDERER — SAFE FOR ALL LAYOUTS
+// CLEAN IMG RENDERING (no wrapper)
+// CLEAN IMG RENDERING (no extra wrapper)
 if (Tag === "img") {
-  const normalizedWidth =
-    styles?.width == null
-      ? null
-      : typeof styles.width === "number"
-      ? `${styles.width}px`
-      : styles.width;
+
+  const imgStyle = {
+    ...styles,
+    outline: selected ? "3px solid #2563eb" : "none",
+    boxSizing: "border-box",
+    display: "block",
+  };
 
   return (
-    <div
-      style={{
-        display: "inline-block",
-
-        // ⭐ SHRINK TO IMAGE SIZE, NOT PARENT LAYOUT
-        width: normalizedWidth || "fit-content",
-        height: "fit-content",
-
-        // ⭐ BLOCK PARENT FROM STRETCHING THIS BOX
-        justifySelf: "start",
-        alignSelf: "start",
-        flexShrink: 0,
-
-        // KEEP DEFAULT STYLES
-        maxWidth: "100%",
+    <img
+      data-id={comp.id}
+      src={props.src || comp.content || ""}
+      alt={props.alt || ""}
+      style={imgStyle}
+      onClick={(e) => {
+        e.stopPropagation();
+        dispatch(selectComponent(comp.id));
       }}
-    >
-      <img
-        src={props.src || comp.props?.src || ""}
-        alt={props.alt || ""}
-        style={{
-          display: "block",
-          width: normalizedWidth ? "100%" : "auto",
-          height: "auto",
-          pointerEvents: "none",
-          borderRadius: styles?.borderRadius || 0,
-        }}
-      />
-    </div>
+      {...props}
+    />
   );
 }
+
 
   if (Tag === "video") return <video style={styles} controls {...props} />;
   if (Tag === "input") return <input style={styles} {...props} />;
@@ -157,14 +154,23 @@ if (comp.type === "navbar" || comp.type === "nav") {
 }
 
 
-  // DEFAULT COMPONENT RENDERING WITH CHILDREN
-  return (
-    <Tag style={styles} {...props}>
-      {/* Component's own text */}
-      {comp.content}
 
-      {/* CHILDREN MUST BE INSIDE HERE (fixes layout issues) */}
-      {children}
-    </Tag>
-  );
+
+
+return (
+  <Tag
+    style={elementStyle}
+    {...props}
+    data-id={comp.id}
+    onClick={(e) => {
+      e.stopPropagation();
+      dispatch(selectComponent(comp.id));
+    }}
+  >
+    {comp.content}
+    {children}
+  </Tag>
+);
+
+
 }
