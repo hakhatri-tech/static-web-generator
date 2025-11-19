@@ -65,7 +65,7 @@ function createBaseComponent(type) {
     case "image":
       base.props.src = "https://images.unsplash.com/photo-1506765515384-028b60a970df?w=1200&q=60&auto=format&fit=crop";
       base.props.alt = "image";
-      base.styles.width = "100%";
+      base.styles.width = {};
       base.styles.borderRadius = "8px";
       base.styles.display = "block";
       return base;
@@ -568,6 +568,18 @@ const builderSlice = createSlice({
   name: "builder",
   initialState,
   reducers: {
+    // builderSlice.js — ADD THESE TWO reducers inside createSlice({ reducers: {} })
+
+    setSelectedIds: (state, action) => {
+      state.selectedIds = action.payload; // Array of IDs
+    },
+
+    deleteComponents: (state, action) => {
+      const idsToDelete = action.payload; // array
+      state.components = state.components.filter((c) => !idsToDelete.includes(c.id));
+      state.selectedIds = []; // clear selection
+    },
+
     addComponent(state, action) {
       const { type, targetId = "root", insertIndex = null } = action.payload;
       pushHistory(state);
@@ -683,16 +695,16 @@ const builderSlice = createSlice({
       state.future = [];
     },
     resetComponent(state, action) {
-  const id = action.payload;
-  const node = findNodeById(state.root, id);
-  if (!node) return;
+      const id = action.payload;
+      const node = findNodeById(state.root, id);
+      if (!node) return;
 
-  const fresh = createBaseComponent(node.type);
-  node.styles = fresh.styles;
-  node.props = fresh.props;
-  node.content = fresh.content;
-  node.children = fresh.children;
-}
+      const fresh = createBaseComponent(node.type);
+      node.styles = fresh.styles;
+      node.props = fresh.props;
+      node.content = fresh.content;
+      node.children = fresh.children;
+    }
 
   },
 });
@@ -709,6 +721,8 @@ export const {
   undo,
   redo,
   clearHistory,
-  resetComponent
+  resetComponent,
+  setSelectedIds,
+  deleteComponents,
 } = builderSlice.actions;
 export default builderSlice.reducer;

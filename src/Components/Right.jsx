@@ -5,6 +5,7 @@ import {
   updateStyle,
   updateContent,
   deleteComponent,
+  deleteComponents,
   duplicateComponent,
   undo,
   redo,
@@ -68,6 +69,14 @@ export default function Right() {
     if (!comp) return;
     dispatch(updateContent({ id: comp.id, content: value }));
   };
+  const setProp = (prop, value) => {
+  if (!comp) return;
+  dispatch({
+    type: "builder/updateProps",
+    payload: { id: comp.id, prop, value },
+  });
+};
+
 
   // Utility for numeric input that stores value with px or raw depending on propName
   const setNumeric = (property, rawValue, raw = false) => {
@@ -131,6 +140,46 @@ export default function Right() {
           </div>
 
           {/* Content */}
+
+          {/* Image Editor */}
+{comp.type === "image" && (
+  <Section title="Image" defaultOpen>
+    <Labeled label="Image URL">
+      <input
+        type="text"
+        placeholder="https://..."
+        value={comp.props?.src || ""}
+        onChange={(e) => setProp("src", e.target.value)}
+
+        
+        style={{ width: "30%" }}
+      />
+    </Labeled>
+
+    <Labeled label="Alt Text">
+      <input
+        type="text"
+        placeholder="Describe image"
+        value={comp.props?.alt || ""}
+        onChange={(e) =>
+          dispatch({
+            type: "builder/updateProps",
+            payload: {
+              id: comp.id,
+              prop: "alt",
+              value: e.target.value,
+            },
+          })
+        }
+        style={{ width: "30%" }}
+      />
+    </Labeled>
+  </Section>
+)}
+
+
+
+
           {"content" in comp && (
             <Section title="Content" defaultOpen>
               <Labeled label="Text / HTML">
@@ -330,6 +379,14 @@ export default function Right() {
           <Section title="Background" defaultOpen>
             <Labeled label="Background (color / gradient)">
               <input
+                type = "color"
+                value={comp.styles?.background || ""}
+                onChange={(e) => setStyle("background", e.target.value)}
+                placeholder="e.g. #fff or linear-gradient(...)"
+                style={{ width: "100%" }}
+              />
+               <input
+             
                 value={comp.styles?.background || ""}
                 onChange={(e) => setStyle("background", e.target.value)}
                 placeholder="e.g. #fff or linear-gradient(...)"

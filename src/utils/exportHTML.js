@@ -57,7 +57,7 @@ export function exportRootAsHtml(root, options = {}) {
   const body = renderNode(root);
   const css = `
     html,body{margin:0;padding:0;font-family:Inter,system-ui,Arial,sans-serif;color:#111;}
-    .site-container{max-width:1200px;margin:0 auto;padding:20px;}
+    .site-container{max-width:100vw;margin:0 auto;padding:0px;}
     img{max-width:100%;height:auto;display:block;}
     @media (max-width: 768px) {
       [data-grid="true"]{grid-template-columns: 1fr !important;}

@@ -91,7 +91,48 @@ export default function ComponentRenderer({ comp, children }) {
   const props = comp.props || {};
 
   // Special handling for IMG, VIDEO, INPUT, IFRAME, CHECKBOX
-  if (Tag === "img") return <img style={styles} {...props} alt={props.alt || ""} />;
+ // FINAL IMAGE RENDERER — SAFE FOR ALL LAYOUTS
+if (Tag === "img") {
+  const normalizedWidth =
+    styles?.width == null
+      ? null
+      : typeof styles.width === "number"
+      ? `${styles.width}px`
+      : styles.width;
+
+  return (
+    <div
+      style={{
+        display: "inline-block",
+
+        // ⭐ SHRINK TO IMAGE SIZE, NOT PARENT LAYOUT
+        width: normalizedWidth || "fit-content",
+        height: "fit-content",
+
+        // ⭐ BLOCK PARENT FROM STRETCHING THIS BOX
+        justifySelf: "start",
+        alignSelf: "start",
+        flexShrink: 0,
+
+        // KEEP DEFAULT STYLES
+        maxWidth: "100%",
+      }}
+    >
+      <img
+        src={props.src || comp.props?.src || ""}
+        alt={props.alt || ""}
+        style={{
+          display: "block",
+          width: normalizedWidth ? "100%" : "auto",
+          height: "auto",
+          pointerEvents: "none",
+          borderRadius: styles?.borderRadius || 0,
+        }}
+      />
+    </div>
+  );
+}
+
   if (Tag === "video") return <video style={styles} controls {...props} />;
   if (Tag === "input") return <input style={styles} {...props} />;
   if (Tag === "iframe") return <iframe style={styles} {...props} title={props.title || "embed"} />;

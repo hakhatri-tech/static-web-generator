@@ -6,6 +6,8 @@ import { ItemTypes } from "../dnd/DragTypes";
 import CustomDragLayer from "./CustomDragLayer";
 import ComponentWrapper from "./ComponentWrapper";
 import { addComponent, moveComponent, selectComponent } from "../store/builderSlice";
+import { setSelectedIds, deleteComponents } from "../store/builderSlice";
+import { useEffect } from "react";
 
 export default function Center() {
   const root = useSelector((s) => s.builder.root);
@@ -43,7 +45,7 @@ export default function Center() {
 
 
   return (
-    <main ref={dropRef} className="center-panel" style={{ padding: 16, overflow: "auto", flex: 1 }} onClick={() =>dispatch(selectComponent(null))}>
+    <main ref={dropRef} className="center-panel" style={{padding:"10px", overflow: "auto", flex: 1 }} onClick={() =>dispatch(selectComponent(null))}>
       <CustomDragLayer />
       <div data-id="root" style={{ minHeight: 240 }}>
         {(root.children || []).map((c) => <ComponentWrapper key={c.id} node={c} />)}
