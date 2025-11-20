@@ -11,6 +11,9 @@ import {
   redo,
   clearHistory,
   resetComponent,
+  updateSliderImages,
+  updateSliderSettings,
+  updateId
 } from "../store/builderSlice";
 import { findById } from "../store/selectors";
 import { exportRootAsHtml } from "../utils/exportHTML";
@@ -70,12 +73,12 @@ export default function Right() {
     dispatch(updateContent({ id: comp.id, content: value }));
   };
   const setProp = (prop, value) => {
-  if (!comp) return;
-  dispatch({
-    type: "builder/updateProps",
-    payload: { id: comp.id, prop, value },
-  });
-};
+    if (!comp) return;
+    dispatch({
+      type: "builder/updateProps",
+      payload: { id: comp.id, prop, value },
+    });
+  };
 
 
   // Utility for numeric input that stores value with px or raw depending on propName
@@ -101,9 +104,23 @@ export default function Right() {
       </div>
 
       <div style={{ marginBottom: 12 }}>
-        <button onClick={() => dispatch(resetComponent())} style={{ width: "100%" }}>
-          Reset / Clear History
+        <button
+          onClick={() => {
+            localStorage.removeItem("builderState");
+            window.location.reload();
+          }}
+          style={{
+            padding: "8px 12px",
+            borderRadius: "6px",
+            background: "#ef4444",
+            color: "white",
+            border: "none",
+            cursor: "pointer"
+          }}
+        >
+          Reset Canvas
         </button>
+
       </div>
 
       {/* No selection placeholder */}
@@ -142,40 +159,40 @@ export default function Right() {
           {/* Content */}
 
           {/* Image Editor */}
-{comp.type === "image" && (
-  <Section title="Image" defaultOpen>
-    <Labeled label="Image URL">
-      <input
-        type="text"
-        placeholder="https://..."
-        value={comp.props?.src || ""}
-        onChange={(e) => setProp("src", e.target.value)}
+          {comp.type === "image" && (
+            <Section title="Image" defaultOpen>
+              <Labeled label="Image URL">
+                <input
+                  type="text"
+                  placeholder="https://..."
+                  value={comp.props?.src || ""}
+                  onChange={(e) => setProp("src", e.target.value)}
 
-        
-        style={{ width: "30%" }}
-      />
-    </Labeled>
 
-    <Labeled label="Alt Text">
-      <input
-        type="text"
-        placeholder="Describe image"
-        value={comp.props?.alt || ""}
-        onChange={(e) =>
-          dispatch({
-            type: "builder/updateProps",
-            payload: {
-              id: comp.id,
-              prop: "alt",
-              value: e.target.value,
-            },
-          })
-        }
-        style={{ width: "30%" }}
-      />
-    </Labeled>
-  </Section>
-)}
+                  style={{ width: "30%" }}
+                />
+              </Labeled>
+
+              <Labeled label="Alt Text">
+                <input
+                  type="text"
+                  placeholder="Describe image"
+                  value={comp.props?.alt || ""}
+                  onChange={(e) =>
+                    dispatch({
+                      type: "builder/updateProps",
+                      payload: {
+                        id: comp.id,
+                        prop: "alt",
+                        value: e.target.value,
+                      },
+                    })
+                  }
+                  style={{ width: "30%" }}
+                />
+              </Labeled>
+            </Section>
+          )}
 
 
 
@@ -284,6 +301,109 @@ export default function Right() {
             </Labeled>
           </Section>
 
+          {/* 🔥 SLIDER CONTROLS */}
+          {/* 🔥 BACKGROUND SLIDER — inside its own Section */}
+          {comp?.type === "div" && (
+            <Section title="Background Slider" defaultOpen={false}>
+
+              {/* TOTAL IMAGES */}
+              <Labeled label="Total Images">
+                <input
+                  type="number"
+                  min="0"
+                  value={(comp.sliderImages || []).length}
+                  onChange={(e) => {
+                    let count = Number(e.target.value);
+                    if (count < 0) count = 0;
+
+                    const current = comp.sliderImages || [];
+                    let updated = [...current];
+
+                    if (count > current.length) {
+                      const diff = count - current.length;
+                      for (let i = 0; i < diff; i++) updated.push("");
+                    } else {
+                      updated = updated.slice(0, count);
+                    }
+
+                    dispatch(updateSliderImages({ id: comp.id, images: updated }));
+                  }}
+                />
+              </Labeled>
+
+              {/* IMAGE URL INPUTS */}
+              {(comp.sliderImages || []).map((img, index) => (
+                <Labeled key={index} label={`Image ${index + 1}`}>
+                  <input
+                    placeholder={`Image URL ${index + 1}`}
+                    value={img}
+                    onChange={(e) => {
+                      const arr = [...(comp.sliderImages || [])];
+                      arr[index] = e.target.value;
+                      dispatch(updateSliderImages({ id: comp.id, images: arr }));
+                    }}
+                  />
+                </Labeled>
+              ))}
+
+              {/* SLIDER SETTINGS */}
+              <Labeled label="Autoplay">
+                <select
+                  value={comp.sliderSettings?.autoplay ? "yes" : "no"}
+                  onChange={(e) =>
+                    dispatch(
+                      updateSliderSettings({
+                        id: comp.id,
+                        settings: { autoplay: e.target.value === "yes" },
+                      })
+                    )
+                  }
+                >
+                  <option value="yes">Yes</option>
+                  <option value="no">No</option>
+                </select>
+              </Labeled>
+
+              <Labeled label="Interval (ms)">
+                <input
+                  type="number"
+                  value={comp.sliderSettings?.interval || 3000}
+                  onChange={(e) =>
+                    dispatch(
+                      updateSliderSettings({
+                        id: comp.id,
+                        settings: { interval: Number(e.target.value) },
+                      })
+                    )
+                  }
+                />
+              </Labeled>
+
+              <Labeled label="Transition">
+                <select
+                  value={comp.sliderSettings?.transition || "fade"}
+                  onChange={(e) =>
+                    dispatch(
+                      updateSliderSettings({
+                        id: comp.id,
+                        settings: { transition: e.target.value },
+                      })
+                    )
+                  }
+                >
+                  <option value="fade">Fade</option>
+                  <option value="slide">Slide</option>
+                </select>
+              </Labeled>
+
+            </Section>
+          )}
+
+
+
+
+
+
           {/* Spacing */}
           <Section title="Spacing" defaultOpen>
             <div style={{ display: "flex", gap: 8 }}>
@@ -379,14 +499,14 @@ export default function Right() {
           <Section title="Background" defaultOpen>
             <Labeled label="Background (color / gradient)">
               <input
-                type = "color"
+                type="color"
                 value={comp.styles?.background || ""}
                 onChange={(e) => setStyle("background", e.target.value)}
                 placeholder="e.g. #fff or linear-gradient(...)"
                 style={{ width: "100%" }}
               />
-               <input
-             
+              <input
+
                 value={comp.styles?.background || ""}
                 onChange={(e) => setStyle("background", e.target.value)}
                 placeholder="e.g. #fff or linear-gradient(...)"
@@ -478,31 +598,40 @@ export default function Right() {
           </Section>
 
           {/* Advanced */}
+          <Section title="Id and Link" defaultOpen={false}>
+            <Labeled label="Link (href)">
+              <input
+                type="text"
+                value={comp.props?.href || ""}
+                  onChange={(e) =>
+                    dispatch({
+                      type: "builder/updateProps",
+                      payload: {
+                        id: comp.id,
+                        prop: "href",
+                        value:  e.target.value,
+                      },
+                    })
+                  }
+              />
 
-          <Labeled label="Component Id">
-            <input
-              type="text"
-              value={comp.props?.id || ""}
-              onChange={(e) =>
-                dispatch(updateProps({ id: comp.id, prop: "id", value: e.target.value }))
-              }
-            />
+            </Labeled>
 
-          </Labeled>
-
-          <Labeled label="Button-Action">
-            <input
-              type="text"
-              placeholder='e.g. window.open("https://google.com")'
-              value={comp.props?.onClick || ""}
-              onChange={(e) =>
-                dispatch(updateProps({ id: comp.id, prop: "onClick", value: e.target.value }))
-              }
-            />
+            <Labeled label="Component Id">
+              <input
+                readOnly
+                value={comp.id}
+                onChange={(e) =>
+                  dispatch(updateId({ id: comp.id, newId: e.target.value }))
+                }
+              />
 
 
-          </Labeled>
+            </Labeled>
 
+
+
+          </Section>
 
 
 

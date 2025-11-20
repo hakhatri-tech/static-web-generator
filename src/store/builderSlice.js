@@ -7,6 +7,9 @@ export const CONTAINER_TYPES = new Set(["root", "div", "section", "card", "nav",
 
 // replace the existing createBaseComponent(...) function with this
 
+
+
+
 function createBaseComponent(type) {
   const id = nanoid();
   const base = {
@@ -65,15 +68,15 @@ function createBaseComponent(type) {
     case "image":
       base.props.src = "https://images.unsplash.com/photo-1506765515384-028b60a970df?w=1200&q=60&auto=format&fit=crop";
       base.props.alt = "image";
-      base.styles.width = {};
+      base.styles.width = "auto";
       base.styles.borderRadius = "8px";
-      base.styles.display = "block";
+      base.styles.display = "inline-block";
       return base;
 
     case "button":
       base.content = "Learn more";
       base.styles.display = "inline-block";
-      base.styles.padding = "10px 18px";
+      base.styles.padding = "0px";
       base.styles.background = "#2563eb";
       base.styles.color = "#fff";
       base.styles.borderRadius = "8px";
@@ -97,15 +100,23 @@ function createBaseComponent(type) {
     case "container":
     case "div":
       base.type = "div";
-      base.styles.padding = "8px";
+      base.styles.width = "100vw";
+      base.styles.height = "50PX"
+      base.styles.padding = "0px";
       base.styles.display = "block";
+      base.sliderImages = [];
+  base.sliderSettings = { autoplay: true, interval: 4000, transition: "fade" };
       return base;
 
     case "section":
       base.type = "section";
-      base.styles.padding = "48px 20px";
+      base.styles.padding = "";
       base.styles.background = "transparent";
       base.styles.display = "block";
+      base.styles.width = "100vw";
+      base.styles.height = "250px";
+
+
       return base;
 
     case "grid":
@@ -141,9 +152,11 @@ function createBaseComponent(type) {
       base.styles.display = "flex";
       base.styles.justifyContent = "space-between";
       base.styles.alignItems = "center";
-      base.styles.padding = "12px 20px";
+      base.styles.padding = "0px";
       base.styles.background = "#ffffff";
       base.styles.borderBottom = "1px solid #eef2f6";
+      base.styles.width = "100vw";
+      
       base.children = [
         { id: nanoid(), type: "text", content: "Your Brand", styles: { fontWeight: "700", fontSize: "18px" }, children: [] },
         {
@@ -183,8 +196,8 @@ function createBaseComponent(type) {
               type: "div",
               styles: { marginTop: "20px", display: "flex", gap: "12px" },
               children: [
-                { id: nanoid(), type: "button", content: "Get Started", styles: { background: "#2563eb", color: "#fff", padding: "12px 20px", borderRadius: "8px", border: "none" }, children: [] },
-                { id: nanoid(), type: "button", content: "Live Demo", styles: { background: "transparent", color: "#2563eb", padding: "12px 20px", borderRadius: "8px", border: "1px solid #e6eef8" }, children: [] },
+                { id: nanoid(), type: "button", content: "Get Started", styles: { background: "#2563eb", color: "#fff", padding: "0px 0px", borderRadius: "8px", border: "none" }, children: [] },
+                { id: nanoid(), type: "button", content: "Live Demo", styles: { background: "transparent", color: "#2563eb", padding: "0px 0px", borderRadius: "8px", border: "1px solid #e6eef8" }, children: [] },
               ],
             },
           ],
@@ -539,6 +552,15 @@ function pushHistory(state) {
   state.history = [...state.history, snapshot].slice(-MAX_HISTORY);
   state.future = [];
 }
+function findNodeById(node, id) {
+  if (!node) return null;
+  if (node.id === id) return node;
+  for (const child of node.children || []) {
+    const found = findNodeById(child, id);
+    if (found) return found;
+  }
+  return null;
+}
 
 function findNodeAndParent(node, id, parent = null) {
   if (!node) return null;
@@ -569,6 +591,40 @@ const builderSlice = createSlice({
   initialState,
   reducers: {
     // builderSlice.js — ADD THESE TWO reducers inside createSlice({ reducers: {} })
+
+updateId(state, action) {
+  const { id, newId } = action.payload;
+  const found = findNodeAndParent(state.root, id);
+  if (!found) return;
+  pushHistory(state);
+  found.node.id = newId;
+},
+
+
+
+
+updateSliderImages(state, action) {
+  const { id, images } = action.payload;
+  const node = findNodeById(state.root, id);
+  if (node) {
+    node.sliderImages = images;
+  }
+},
+
+
+updateSliderSettings(state, action) {
+  const { id, settings } = action.payload;
+  const node = findNodeById(state.root, id);
+  if (node) {
+    node.sliderSettings = {
+      ...node.sliderSettings,
+      ...settings,
+    };
+  }
+},
+
+
+
 
     setSelectedIds: (state, action) => {
       state.selectedIds = action.payload; // Array of IDs
@@ -724,5 +780,8 @@ export const {
   resetComponent,
   setSelectedIds,
   deleteComponents,
+  updateSliderImages,
+  updateSliderSettings,
+  updateId,
 } = builderSlice.actions;
 export default builderSlice.reducer;

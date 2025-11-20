@@ -98,7 +98,7 @@ export default function ComponentWrapper({ node, depth = 0 }) {
 
   const wrapperStyle = {
     position: "relative",
-    borderRadius: 8,
+    borderRadius: 0,
     padding: node.styles?.padding || 0,
     margin: node.styles?.margin || 0,
     outline: isSelected ? "3px solid #2563eb" : "none",

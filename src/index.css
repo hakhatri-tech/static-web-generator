@@ -12,12 +12,40 @@ html,body,#root { height: 100%; margin: 0; font-family: Inter, system-ui, Arial,
   border-right: 1px solid #e6eef7;
   box-shadow: 0 2px 6px rgba(2,6,23,0.04);
   overflow: auto;
+  width: 250px;
+  flex-shrink: 0;
 }
 
 .center-panel {
   background: #fafafa;
   border-radius: 8px;
+  flex: 1;
+  overflow: auto;
+  position: relative;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
 }
+
+.canvas-wrapper {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+/* Prevent any component from breaking the canvas */
+.canvas-wrapper * {
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+}
+
 
 .right-panel {
   background: var(--panel);
@@ -25,9 +53,39 @@ html,body,#root { height: 100%; margin: 0; font-family: Inter, system-ui, Arial,
   box-shadow: 0 2px 6px rgba(2,6,23,0.04);
   overflow: auto;
   padding: 50px;
+  width: 350px;
+    min-width: 300px;
+    flex-shrink: 0;
 }
+
+
+.right-panel input,
+.right-panel select,
+.right-panel textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.slider-img-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.slider-img-row input {
+  flex: 1;
+}
+.slider-fade {
+  transition: background-image 0.6s ease-in-out, opacity 0.6s ease-in-out;
+}
+
+
 
 /* small inputs */
 input, select, textarea, button { font-family: inherit; font-size: 14px; padding: 8px; border-radius: 6px; border: 1px solid #e5e7eb; }
 button { cursor: pointer; background: #fff; }
 .left-panel, .right-panel { padding: 12px; }
+.left-panel, .center-panel, .right-panel {
+  height: 100vh;
+  overflow-y: auto;
+}

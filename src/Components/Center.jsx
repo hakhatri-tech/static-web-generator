@@ -47,7 +47,7 @@ export default function Center() {
   return (
     <main ref={dropRef} className="center-panel" style={{padding:"10px", overflow: "auto", flex: 1 }} onClick={() =>dispatch(selectComponent(null))}>
       <CustomDragLayer />
-      <div data-id="root" style={{ minHeight: 240 }}>
+      <div data-id="root" className="canvas-wrapper" style={{ minHeight: 240 }}>
         {(root.children || []).map((c) => <ComponentWrapper key={c.id} node={c} />)}
       </div>
     </main>

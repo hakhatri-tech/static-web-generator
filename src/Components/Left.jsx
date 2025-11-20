@@ -131,10 +131,6 @@ export default function Left() {
       {/* FORM ELEMENTS */}
       <Section title="Form Elements">
         <Item label="Input" type="input" onAdd={add} />
-        <Item label="Textarea" type="textarea" onAdd={add} />
-        <Item label="Checkbox" type="checkbox" onAdd={add} />
-        <Item label="Select Dropdown" type="select" onAdd={add} />
-        <Item label="Form" type="form" onAdd={add} />
       </Section>
 
       {/* LAYOUT ELEMENTS */}

@@ -1,4 +1,7 @@
 // src/utils/exportHTML.js
+
+
+
 function kebabCase(str = "") {
   return str.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
 }
@@ -24,9 +27,21 @@ function escapeHtml(text) {
 }
 function renderNode(node) {
   if (!node) return "";
+
+  let propAttrs = "";
+if (node.props) {
+    for (const [key, value] of Object.entries(node.props)) {
+        if (value == null || value === "") continue;
+        propAttrs += ` ${key}="${escapeHtml(String(value))}"`;
+    }
+}
+
+
+
+
   const styleString = styleObjectToCssString(node.styles || {});
   const dataAttrs = node.styles && node.styles.display === "grid" ? 'data-grid="true"' : "";
-  const attrs = `${dataAttrs} data-id="${escapeHtml(node.id)}" style="${escapeHtml(styleString)}"`;
+  const attrs = `${dataAttrs} id="${escapeHtml(node.id)}" data-id="${escapeHtml(node.id)}" style="${escapeHtml(styleString)}" ${propAttrs}`;
   switch (node.type) {
     case "root":
       return (node.children || []).map(renderNode).join("\n");
@@ -48,7 +63,17 @@ function renderNode(node) {
       return `<${tag} ${attrs}>${children}</${tag}>`;
     }
     default:
-      return `<div ${attrs}>${escapeHtml(node.content || node.type)}</div>`;
+      // return `<div ${attrs}>${escapeHtml(node.content || node.type)}</div>`;
+      let html = `<${tag} ${attrs}>${children}</${tag}>`;
+
+      if (node.props?.href?.startsWith("#")) {
+        html = `<a href="${node.props.href}">${html}</a>`;  // same tab
+      } else {
+        html = `<a href="${node.props.href}" target="_blank">${html}</a>`;
+      }
+
+
+      return html;
   }
 }
 export function exportRootAsHtml(root, options = {}) {
